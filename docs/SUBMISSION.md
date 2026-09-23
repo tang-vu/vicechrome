@@ -1,22 +1,24 @@
 # Submission package
 
-**Pitch:** VICECHROME turns a player's own image edit into a collectible car cover. In a fictional coastal studio, they mark a panel in Unlayer, save it, and watch the same pixels ride out of the garage onto Solera Bay's boulevard.
+**Pitch:** Design your mark. Own the boulevard. VICECHROME is a GTA-inspired car art studio in fictional Solera Bay. A player's real Unlayer edit becomes door-panel art on an original illustrated coupe and the same image appears in a downloadable cover.
 
-**Implemented:** Three original starter commissions and a blank panel; Unlayer Image Editor with manual tools; optional local raster import; fixed door-panel artwork mapping; three body finishes; before/after; short skippable reveal; latest-revision persistence; 1600 × 2000 cover PNG and flat artwork PNG; mobile editor workspace.
-
-**Verified evidence:** `docs/evidence/editor-edited.png` shows a diagonal stroke inside Unlayer. `applied-desktop.png` shows it on the coupe. `sample-cover.png` and `sample-panel-art.png` were downloaded from the live local browser flow. `editor-mobile.png` shows the loaded narrow editor. Automated Chrome runs exercised actual Save, downloads, restore, before/after, cancel, and mobile Save. See `docs/BUILD_NOTES.md` for limits.
-
+**Live:** https://tang-vu.github.io/vicechrome/  
 **Source:** https://github.com/tang-vu/vicechrome  
-**Live studio:** https://tang-vu.github.io/vicechrome/
+**Captioned demo:** [vicechrome-demo.mp4](evidence/vicechrome-demo.mp4)  
+**Before and after:** [original garage](evidence/garage-desktop.png) · [applied mark](evidence/applied-desktop.png) · [exported cover](evidence/sample-cover.png)
 
-## Owner checklist
+The real editor supports original starter art, a blank panel, Draw and Text tools, local image import, three body finishes, and before/after. The shutter opens over the car, light sweeps across the saved artwork, and the boulevard cover exports at 1600 × 2000. Scope is illustrated **door-panel art**, not full-body or 3D customization.
 
-- [ ] Confirm eligibility and any FAQ conditions directly with Unlayer; the linked FAQ was inaccessible through the available fetch tool.
-- [x] Public GitHub source and GitHub Pages deployment are live; a fresh Chrome session exercised the journey.
-- [ ] Record a 45–60 second clip using `DEMO_SCRIPT.md`.
-- [ ] Complete the [submission form](https://lnkd.in/eEE_bKHc) before **September 24, 2026, 23:59 UTC**.
-- [ ] Publish a public post with **#BuiltWithImageEditor**. No form or post is submitted automatically.
+The [official announcement](https://www.linkedin.com/posts/unlayer_builtwithimageeditor-activity-7501266371553452032-RB8U) was rechecked on September 23, 2026. It calls for a GTA VI-inspired experience, React Image Editor as a core part, at least one editable visual, public GitHub source, deployment, submission through the linked form, and a shared build with **#BuiltWithImageEditor**. It states judging covers creativity, visual execution, editor use, and overall experience. The announced deadline is **September 24, 2026, 23:59 UTC = September 25, 06:59 Vietnam time**. The linked Notion FAQ and form redirect remained inaccessible through the available fetch tool; no extra rules are assumed.
+
+## Owner steps
+
+- [ ] Review eligibility or any FAQ conditions directly with Unlayer if the FAQ becomes accessible.
+- [ ] Submit the [competition form](https://lnkd.in/eEE_bKHc) before the announced deadline.
+- [ ] Publish the post below with the demo and live link. No form or post was submitted automatically.
 
 ## X post draft
 
-Built VICECHROME for the Unlayer React Image Editor challenge. Draw panel art in the real editor, save it onto an original illustrated coupe, then roll through Solera Bay and export your one-of-one cover. Source: https://github.com/tang-vu/vicechrome Demo: https://tang-vu.github.io/vicechrome/ #BuiltWithImageEditor
+Built VICECHROME: a GTA-inspired car art studio. Draw your mark in Unlayer's React Image Editor, see it on the coupe, roll out, and export a cover. Demo: https://tang-vu.github.io/vicechrome/ Source: https://github.com/tang-vu/vicechrome #BuiltWithImageEditor
+
+This draft is 259 raw characters and about 231 with standard 23-character link counting.

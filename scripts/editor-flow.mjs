@@ -8,7 +8,9 @@ const page = await browser.newPage({ viewport: { width: 1440, height: 900 }, acc
 const errors = [];
 page.on('pageerror', e => errors.push(e.message));
 await page.goto(process.env.VICECHROME_URL || 'http://localhost:5173/', { waitUntil: 'networkidle' });
+await page.screenshot({ path: 'docs/evidence/welcome-desktop.png', fullPage: true });
 await page.getByRole('button', { name: /enter the garage/i }).click();
+await page.screenshot({ path: 'docs/evidence/garage-desktop.png', fullPage: true });
 await page.getByRole('button', { name: /design your panel art/i }).click();
 await page.getByText('Draw', { exact: true }).click();
 await page.locator('[data-testid="native-draw-size"]').fill('35');

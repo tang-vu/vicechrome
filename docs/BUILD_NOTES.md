@@ -1,33 +1,29 @@
 # Build notes
 
-## Plan and decisions
+## Architecture and scope
 
-1. Verify challenge and SDK requirements, scaffold Vite + React + TypeScript.
-2. Prove the editor's returned bitmap can be fitted to a deterministic car panel.
-3. Build the garage, reveal, boulevard cover, persistence, mobile workspace, and exports.
-4. Test the actual SDK path in Chrome, capture evidence, and prepare submission materials.
+VICECHROME is a Vite, React, and TypeScript client app. The installed `@unlayer/react-image-editor` wrapper supplies the real editor. Its flattened Save bitmap is validated and fitted without stretching into a fixed door-panel clipping path on a code-drawn coupe. The same canvas renderer produces the garage, boulevard, and 1600 × 2000 cover. Saved art lives in IndexedDB; preferences live in localStorage. Unlayer's hosted runtime requires internet access. The optional AI Assistant is disabled. There is no account, backend, paid service, 3D model, or full-body wrap.
 
-The repository was empty apart from `.gitattributes`, and `main` was clean. The official wrapper API documents a required `image` and `onSave({ dataUrl, blob })`. Installed `@unlayer/react-image-editor` is 1.0.2; its types were checked before integration. A fixed 2.5D original coupe was selected to keep panel alignment and export deterministic. The supported claim is **door-panel art**, not an arbitrary body wrap. The optional AI Assistant is explicitly disabled. The official challenge announcement still listed September 24, 2026, 23:59 UTC when checked at 03:38 UTC on September 23, leaving about 44 hours 20 minutes.
+## Finishing pass from review baseline `bdcff4467396b1e168efa6bb6d9046e6497bc143`
 
-The app stores one latest applied blob in IndexedDB. A separate active editor session holds a stable input image; switching a commission selects a fresh seed for the next session. Cancel leaves the applied revision intact. Save results are validated, sequenced, and persisted in order. Cover export renders locally at 1600 × 2000. Unlayer requires its remote editor bundle and related assets; failure shows a retry path.
+- A shared 1000 × 335 panel size now governs starter art and uploaded images. The upload fill covers the final row, and nonmatching aspect ratios retain centered pale margins. The compositor still contains arbitrary valid editor output dimensions.
+- The garage shutter is foreground occlusion over the vehicle. `requestAnimationFrame` drives a short eased opening, followed by a sweep over the body and a boulevard composition. The decoded artwork is reused across animation frames. Skip, replay, reduced motion, home navigation, and unmount cancel the active frame.
+- One trimmed display name supplies preview, reveal, renderer, and sanitized download filename. The cover renderer limits title width.
+- The illustrated car received wheel, arch, seam, glass, highlight, shadow, and headlight glow refinements. The user's bitmap remains unchanged beneath the reflections.
+- The SDK host has a stable desktop height. At 390 px, the editor workspace scrolls sideways to preserve a usable canvas when Draw or Text settings open; app Save and Cancel remain visible above it.
+- The cover PNG is prepared when the cover appears. The Save click downloads a ready blob synchronously, avoiding a delayed programmatic download after editor and font work.
+- README, actual before/after evidence, social metadata with a deployed absolute preview-image URL, and a captioned demo were added.
 
-Source is public at https://github.com/tang-vu/vicechrome. GitHub Pages is configured at https://tang-vu.github.io/vicechrome/. A clean Chrome session passed the live edit/save/export and mobile paths. The deployment workflow runs on each push to `main`.
+## Verification
 
-## Verified status
+- `npm run build`, `npm run typecheck`, and `npm run lint` pass.
+- `node scripts/regressions.mjs` checks opaque 1000 × 335 upload output, opaque last row, centered square source, shutter occlusion at 0/0.5/1, empty and whitespace render equivalence, real import into Unlayer, and four name cases including 28 characters.
+- `npm run verify:browser` draws a distinctive mark in the real SDK, saves it, verifies changed door and cover pixels, checks reload, before/after, cancel, and records three actual UI shutter frames: [closed](evidence/reveal-closed.png), [halfway](evidence/reveal-halfway.png), [open](evidence/reveal-open.png). The halfway frame leaves the roof covered while revealing the lower car.
+- `npm run verify:mobile` opens Draw at 390 × 844, makes a visible diagonal edit, saves it, and compares the applied car and downloaded cover against the original. It asserts reachable Save, no page horizontal overflow, usable canvas width, PNG dimensions, and no page errors. See [edited mobile canvas](evidence/editor-mobile-edited.png), [applied car](evidence/applied-mobile.png), and [cover](evidence/mobile-cover.png).
+- The actual [captioned demo video](evidence/vicechrome-demo.mp4) was recorded from the browser and inspected. The [demo cover](evidence/demo-cover.png) comes from its export click.
 
-- `npm run build` and `npm run lint` pass.
-- Chrome browser automation loaded the real Unlayer editor, selected Draw, drew a diagonal mark, clicked its Save button, and saw the mark on the car and the exported cover. No callback was injected.
-- The downloaded cover is a 1600 × 2000 PNG; the flat artwork download opened as PNG. Evidence lives in `docs/evidence/`.
-- Chrome flow tested reload restoration, same-view before/after, opening the saved revision, and cancel without losing the applied revision.
-- A calibration bitmap with LEFT, RIGHT, an arrow, checkerboard, and diamond stayed correctly oriented on the panel (`calibration-panel.png` and `calibration-car.png`).
-- At 390 × 844, the editor loaded with a reachable labeled mobile Save action, and the page had no horizontal overflow. The mobile Save path was exercised separately.
-- Simulated IndexedDB failure and a corrupt PNG upload did not prevent editing, applying artwork, or exporting a cover.
+The official [challenge announcement](https://www.linkedin.com/posts/unlayer_builtwithimageeditor-activity-7501266371553452032-RB8U) was rechecked on September 23, 2026. It states the September 24, 23:59 UTC deadline. The linked FAQ and form redirect were inaccessible through the available fetch tool; no unverified conditions are asserted.
 
-## Limitations
+## Limits
 
-- The coupe is an original stylized 2.5D illustration with one mapped door area. Other panels cannot be edited.
-- The image is flattened by Unlayer. There is no layer serialization or live preview before Save.
-- Cover typography uses bundled fonts. The image-editing UI itself depends on Unlayer's CDN and may change with its hosted runtime.
-- Browser storage is best effort. Only the latest revision is retained to bound storage.
-- Reveal has visual motion only; no sound. It is skippable and bypassed for reduced motion.
-- The Unlayer challenge FAQ and submission form redirect could not be read through the available web fetch tool. The public announcement requirements were checked separately.
+Only one door panel is editable. Editor Save flattens layers and reopening edits pixels. Browser storage is best effort. The editor itself depends on Unlayer's CDN. The reveal has no sound and is skipped under reduced motion.
