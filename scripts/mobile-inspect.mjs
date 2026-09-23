@@ -20,7 +20,9 @@ assert.ok(await page.getByRole('button', { name: /save artwork/i }).isVisible())
 assert.equal(await page.evaluate(() => document.documentElement.scrollWidth > innerWidth), false);
 await page.getByText('Text', { exact: true }).click();
 await page.locator('.editor-frame').evaluate(el => { el.scrollLeft = 0; });
-assert.ok((await page.locator('canvas.upper-canvas').boundingBox()).width > 300);
+const textLayout = await page.evaluate(() => ({ frame: document.querySelector('.editor-frame').getBoundingClientRect().toJSON(), canvas: document.querySelector('canvas.upper-canvas').getBoundingClientRect().toJSON() }));
+assert.ok(textLayout.canvas.width > 300 && textLayout.canvas.height > 300);
+assert.ok(textLayout.canvas.bottom <= textLayout.frame.bottom + 1);
 assert.ok(await page.getByRole('button', { name: /save artwork/i }).isVisible());
 await page.getByText('Draw', { exact: true }).click();
 await page.locator('.editor-frame').evaluate(el => { el.scrollLeft = 0; });

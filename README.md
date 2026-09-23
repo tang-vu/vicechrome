@@ -19,7 +19,7 @@ npm ci
 npm run dev
 ```
 
-Open the local URL printed by Vite. Run `npm run build`, `npm run typecheck`, and `npm run lint` for production checks. The browser scripts use Playwright and Chrome. Set `CHROME_PATH` if needed, or install Playwright Chromium. With the dev server running, run `npm run verify:browser`, `npm run verify:mobile`, and `node scripts/regressions.mjs`. Set `VICECHROME_URL` to exercise the deployed site.
+Open the local URL printed by Vite. Run `npm run build`, `npm run typecheck`, and `npm run lint` for production checks. The browser scripts use Playwright and Chrome. Set `CHROME_PATH` if needed, or install Playwright Chromium. With the dev server running, run `npm run verify:browser`, `npm run verify:mobile`, `npm run verify:text`, and `node scripts/regressions.mjs`. Set `VICECHROME_URL` to exercise the deployed site.
 
 ## How the artwork reaches the car
 

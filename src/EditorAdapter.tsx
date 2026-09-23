@@ -12,5 +12,5 @@ export interface EditorAdapterProps {
 const options = { theme: 'dark' as const, features: { ai: { enabled: false, assistant: false } } };
 
 export default function EditorAdapter({ image, onSave, onCancel, onFailure, onLoaded }: EditorAdapterProps) {
-  return <ImageEditor image={image} options={options} minHeight={520} style={{ height: '100%' }} onLoad={onLoaded} onSave={onSave} onCancel={onCancel} onLoadError={() => onFailure('The artwork could not load into Unlayer. Try another image.')} onError={(error) => onFailure(`Unlayer could not start: ${error.message}`)} />;
+  return <ImageEditor image={image} options={options} minHeight={0} style={{ height: '100%', minHeight: 0 }} onLoad={onLoaded} onSave={onSave} onCancel={onCancel} onLoadError={() => onFailure('The artwork could not load into Unlayer. Try another image.')} onError={(error) => onFailure(`Unlayer could not start: ${error.message}`)} />;
 }

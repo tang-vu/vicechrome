@@ -23,6 +23,12 @@ VICECHROME is a Vite, React, and TypeScript client app. The installed `@unlayer/
 - The actual [captioned demo video](evidence/vicechrome-demo.mp4) was recorded from the browser and inspected. The [demo cover](evidence/demo-cover.png) comes from its export click.
 - GitHub Pages workflow [run 35827855458](https://github.com/tang-vu/vicechrome/actions/runs/35827855458) succeeded for commit `2ee3bc9`. The public page and absolute Open Graph preview image returned HTTP 200. Desktop and 390 px real-SDK edit/save/cover journeys also passed against `https://tang-vu.github.io/vicechrome/` with no page errors.
 
+## Text workspace correction after live review
+
+The reviewer reproduced a remaining Text → Heading overflow on deployed `907e5f1`: the editor frame was about 570–606 px tall while the SDK wrapper grew to 1,111 px and its canvas to 1,058 px. The installed wrapper exposes `minHeight` and `style`, but no `wrapperStyle` prop. Setting `minHeight={0}` on the SDK and making our `.editor-frame` a flex container bounds the wrapper and canvas without styling undocumented SDK internals.
+
+The focused `npm run verify:text` check now edits a Heading in the real SDK, measures wrapper and canvas bounds, scrolls the long Text settings panel, and checks Save and Cancel. In the local 1440 × 900 run, the wrapper measured 568 px inside a 570 px frame and the canvas 515 px; the settings panel scrolled from 0 to its end. A 390 × 844 Text → Heading check also keeps the canvas inside the frame and the mobile Save control visible. See the [desktop](evidence/editor-text-fixed.png) and [mobile](evidence/editor-text-mobile-fixed.png) evidence.
+
 The official [challenge announcement](https://www.linkedin.com/posts/unlayer_builtwithimageeditor-activity-7501266371553452032-RB8U) was rechecked on September 23, 2026. It states the September 24, 23:59 UTC deadline. The linked FAQ and form redirect were inaccessible through the available fetch tool; no unverified conditions are asserted.
 
 ## Limits
