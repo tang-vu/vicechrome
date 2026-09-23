@@ -1,4 +1,6 @@
 export type Direction = 'sunset' | 'midnight' | 'beach' | 'plain';
+export const PANEL_WIDTH = 1000;
+export const PANEL_HEIGHT = 335;
 
 export const commissions: { id: Direction; title: string; brief: string; code: string }[] = [
   { id: 'sunset', title: 'Sunset Courier', brief: 'A last delivery under coral skies.', code: '01 / CORAL' },
@@ -9,10 +11,10 @@ export const commissions: { id: Direction; title: string; brief: string; code: s
 
 export function makeStarter(id: Direction): string {
   const canvas = document.createElement('canvas');
-  canvas.width = 1000; canvas.height = 335;
+  canvas.width = PANEL_WIDTH; canvas.height = PANEL_HEIGHT;
   const c = canvas.getContext('2d')!;
   const bg = id === 'midnight' ? '#121b25' : id === 'beach' ? '#b7d5bf' : id === 'plain' ? '#e8e1d3' : '#f0725d';
-  c.fillStyle = bg; c.fillRect(0, 0, 1000, 335);
+  c.fillStyle = bg; c.fillRect(0, 0, PANEL_WIDTH, PANEL_HEIGHT);
   if (id === 'plain') return canvas.toDataURL('image/png');
   c.save();
   c.translate(-100, 0); c.rotate(-0.27);
@@ -44,12 +46,12 @@ export async function normalizeUpload(file: File): Promise<string> {
   try { bitmap = await createImageBitmap(file); } catch { throw new Error('This image could not be decoded.'); }
   try {
     if (bitmap.width < 64 || bitmap.height < 64 || bitmap.width > 6000 || bitmap.height > 6000) throw new Error('Image dimensions must be between 64 and 6000 pixels.');
-    const canvas = document.createElement('canvas'); canvas.width = 1000; canvas.height = 420;
+    const canvas = document.createElement('canvas'); canvas.width = PANEL_WIDTH; canvas.height = PANEL_HEIGHT;
     const c = canvas.getContext('2d')!;
-    c.fillStyle = '#e8e1d3'; c.fillRect(0, 0, 1000, 335);
-    const scale = Math.min(1000 / bitmap.width, 335 / bitmap.height);
+    c.fillStyle = '#e8e1d3'; c.fillRect(0, 0, PANEL_WIDTH, PANEL_HEIGHT);
+    const scale = Math.min(PANEL_WIDTH / bitmap.width, PANEL_HEIGHT / bitmap.height);
     const w = bitmap.width * scale, h = bitmap.height * scale;
-    c.drawImage(bitmap, (1000 - w) / 2, (335 - h) / 2, w, h);
+    c.drawImage(bitmap, (PANEL_WIDTH - w) / 2, (PANEL_HEIGHT - h) / 2, w, h);
     return canvas.toDataURL('image/png');
   } finally { bitmap.close(); }
 }

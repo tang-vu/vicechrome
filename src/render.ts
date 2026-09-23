@@ -1,7 +1,7 @@
 export type Scene = 'garage' | 'boulevard';
 export type Paint = 'graphite' | 'ivory' | 'coral';
 
-export interface RenderOptions { scene: Scene; paint: Paint; art?: HTMLImageElement | null; lights?: boolean; shutter?: number }
+export interface RenderOptions { scene: Scene; paint: Paint; art?: HTMLImageElement | null; lights?: boolean; shutter?: number; lightSweep?: number }
 
 const bodyColors: Record<Paint, [string, string, string]> = {
   graphite: ['#657176', '#273339', '#101b20'],
@@ -26,7 +26,7 @@ function palm(c: CanvasRenderingContext2D, x: number, y: number, scale: number) 
   c.restore();
 }
 
-function background(c: CanvasRenderingContext2D, scene: Scene, shutter = 1) {
+function background(c: CanvasRenderingContext2D, scene: Scene) {
   const g = c.createLinearGradient(0, 0, 0, 650);
   if (scene === 'boulevard') {
     g.addColorStop(0, '#e87268'); g.addColorStop(.48, '#d79980'); g.addColorStop(.7, '#537c81'); g.addColorStop(1, '#182b35');
@@ -38,6 +38,8 @@ function background(c: CanvasRenderingContext2D, scene: Scene, shutter = 1) {
     c.fillStyle = '#172831'; c.fillRect(0, 501, 1200, 149);
     line(c, [0, 531, 1200, 531], '#cead88', 3);
     line(c, [0, 593, 1200, 593], '#5d6e69', 2);
+    c.fillStyle = '#9f73705c'; c.fillRect(0, 445, 1200, 8);
+    for (let x = 120; x < 1200; x += 190) { c.fillStyle = '#f7d7ad35'; c.fillRect(x, 409, 82, 5); }
   } else {
     g.addColorStop(0, '#31393b'); g.addColorStop(.7, '#1b272b'); g.addColorStop(1, '#111c20');
     c.fillStyle = g; c.fillRect(0, 0, 1200, 650);
@@ -51,12 +53,21 @@ function background(c: CanvasRenderingContext2D, scene: Scene, shutter = 1) {
     c.fillStyle = '#243034'; c.fillRect(0, 490, 1200, 160);
     for (let x = -200; x < 1400; x += 230) line(c, [x, 650, x + 145, 490], '#c8b49924', 2);
     c.fillStyle = '#e1a578'; c.fillRect(167, 117, 135, 5); c.fillRect(898, 117, 135, 5);
-    if (shutter < 1) {
-      const h = (1 - shutter) * 480;
-      c.fillStyle = '#111b1f'; c.fillRect(96, 93, 1008, h);
-      for (let y = 112; y < h + 93; y += 22) line(c, [96, y, 1104, y], '#6b73734f', 2);
-    }
   }
+}
+
+function foregroundShutter(c: CanvasRenderingContext2D, progress: number) {
+  if (progress >= 1) return;
+  const bottom = 520 - 445 * Math.max(0, progress);
+  c.save();
+  c.fillStyle = '#111b1f'; c.fillRect(96, 75, 1008, bottom - 75);
+  for (let y = 85; y < bottom; y += 21) {
+    c.fillStyle = y % 42 < 21 ? '#354348' : '#29373b'; c.fillRect(98, y, 1004, 19);
+    line(c, [99, y + 19, 1101, y + 19], '#82908b87', 2);
+  }
+  c.fillStyle = '#c69670'; c.fillRect(94, bottom - 8, 1012, 8);
+  c.fillStyle = '#19272a'; c.fillRect(80, 75, 16, Math.max(0, bottom - 75)); c.fillRect(1104, 75, 16, Math.max(0, bottom - 75));
+  c.restore();
 }
 
 function bodyPath(c: CanvasRenderingContext2D) {
@@ -78,6 +89,9 @@ function wheel(c: CanvasRenderingContext2D, x: number) {
     c.fillStyle = '#abb7b5'; c.beginPath(); c.moveTo(-9, -10); c.lineTo(-7, -45); c.lineTo(7, -45); c.lineTo(9, -10); c.fill(); c.restore();
   }
   c.fillStyle = '#e4d1a7'; c.beginPath(); c.arc(x, 476, 10, 0, Math.PI * 2); c.fill();
+  c.strokeStyle = '#e7ded0a0'; c.lineWidth = 2; c.beginPath(); c.arc(x, 476, 55, 0, Math.PI * 2); c.stroke();
+  c.fillStyle = '#718387';
+  for (let i = 0; i < 6; i++) { const a = i * Math.PI / 3; c.beginPath(); c.arc(x + Math.cos(a) * 30, 476 + Math.sin(a) * 30, 3, 0, Math.PI * 2); c.fill(); }
 }
 
 function car(c: CanvasRenderingContext2D, options: RenderOptions) {
@@ -90,6 +104,7 @@ function car(c: CanvasRenderingContext2D, options: RenderOptions) {
   const metal = c.createLinearGradient(0, 242, 0, 490);
   metal.addColorStop(0, light); metal.addColorStop(.35, mid); metal.addColorStop(.63, light); metal.addColorStop(.83, mid); metal.addColorStop(1, dark);
   c.fillStyle = metal; c.fill(); c.lineWidth = 3; c.strokeStyle = '#d7d5bd77'; c.stroke();
+  line(c, [175, 392, 286, 349, 365, 279], '#f7eee077', 3);
   c.save(); bodyPath(c); c.clip();
   // The editable bitmap is fitted to a single, fixed door panel under the car's reflections.
   c.beginPath(); c.moveTo(426, 351); c.lineTo(752, 349); c.lineTo(756, 461); c.lineTo(415, 461); c.closePath(); c.clip();
@@ -103,6 +118,8 @@ function car(c: CanvasRenderingContext2D, options: RenderOptions) {
   line(c, [410, 352, 405, 457], '#081a2099', 3);
   line(c, [759, 348, 766, 463], '#081a2099', 3);
   line(c, [416, 463, 756, 463], '#111c2199', 3);
+  line(c, [770, 352, 820, 449], '#14242a9c', 2);
+  line(c, [249, 357, 205, 425], '#e4dfcb70', 2);
   const reflection = c.createLinearGradient(390, 322, 800, 458);
   reflection.addColorStop(0, '#ffffff00'); reflection.addColorStop(.37, '#ffffff36'); reflection.addColorStop(.53, '#ffffff08'); reflection.addColorStop(1, '#ffffff00');
   c.fillStyle = reflection; c.beginPath(); c.moveTo(405, 345); c.lineTo(785, 344); c.lineTo(762, 464); c.lineTo(405, 464); c.fill();
@@ -110,6 +127,8 @@ function car(c: CanvasRenderingContext2D, options: RenderOptions) {
   c.lineTo(711, 249); c.quadraticCurveTo(753, 250, 781, 278); c.lineTo(837, 326); c.closePath(); c.fill();
   c.fillStyle = '#6c9398aa'; c.beginPath(); c.moveTo(391, 314); c.lineTo(436, 268); c.lineTo(528, 258); c.lineTo(521, 316); c.closePath(); c.fill();
   c.fillStyle = '#88afb299'; c.beginPath(); c.moveTo(542, 256); c.lineTo(713, 255); c.quadraticCurveTo(749, 257, 775, 282); c.lineTo(817, 318); c.lineTo(536, 317); c.closePath(); c.fill();
+  line(c, [399, 307, 444, 267, 511, 260], '#d6ece491', 3);
+  line(c, [554, 264, 709, 263, 765, 292], '#d6ece47d', 3);
   line(c, [529, 252, 525, 322], '#d4d9cd', 5);
   line(c, [377, 325, 838, 329], '#d0d0bfaa', 4);
   line(c, [466, 342, 714, 342], '#d6d5c280', 2);
@@ -119,16 +138,27 @@ function car(c: CanvasRenderingContext2D, options: RenderOptions) {
   c.fillStyle = '#e36e63'; c.fillRect(152, 402, 31, 17);
   line(c, [156, 449, 1048, 449], '#dae0cf66', 3);
   c.fillStyle = '#101c21'; c.fillRect(160, 476, 869, 13);
+  for (const x of [322, 886]) {
+    c.strokeStyle = '#142126'; c.lineWidth = 8; c.beginPath(); c.arc(x, 476, 84, Math.PI * 1.04, Math.PI * 1.96); c.stroke();
+    c.strokeStyle = '#e6e0cb80'; c.lineWidth = 2; c.beginPath(); c.arc(x, 476, 88, Math.PI * 1.08, Math.PI * 1.92); c.stroke();
+  }
   wheel(c, 322); wheel(c, 886);
   if (options.lights) {
-    const beam = c.createRadialGradient(1054, 386, 2, 1075, 402, 128);
-    beam.addColorStop(0, '#ffeac6aa'); beam.addColorStop(1, '#ffeac600');
-    c.fillStyle = beam; c.fillRect(1000, 302, 200, 180);
+    const beam = c.createRadialGradient(1050, 386, 3, 1040, 401, 145);
+    beam.addColorStop(0, '#fff0c8be'); beam.addColorStop(.42, '#ffeac658'); beam.addColorStop(1, '#ffeac600');
+    c.fillStyle = beam; c.fillRect(850, 200, 350, 405);
+  }
+  if (options.lightSweep !== undefined && options.lightSweep > 0 && options.lightSweep < 1) {
+    const x = 220 + options.lightSweep * 820;
+    const sweep = c.createLinearGradient(x - 100, 0, x + 100, 0);
+    sweep.addColorStop(0, '#fff4df00'); sweep.addColorStop(.5, '#fff4df52'); sweep.addColorStop(1, '#fff4df00');
+    c.save(); bodyPath(c); c.clip(); c.fillStyle = sweep; c.fillRect(x - 100, 238, 200, 250); c.restore();
   }
 }
 
 export function renderStage(c: CanvasRenderingContext2D, options: RenderOptions) {
-  c.save(); c.clearRect(0, 0, 1200, 650); background(c, options.scene, options.shutter); car(c, options);
+  c.save(); c.clearRect(0, 0, 1200, 650); background(c, options.scene); car(c, options);
+  if (options.scene === 'garage') foregroundShutter(c, options.shutter ?? 1);
   c.restore();
 }
 
@@ -147,9 +177,10 @@ export function renderCover(c: CanvasRenderingContext2D, options: RenderOptions,
   c.fillStyle = '#f5e9d3'; c.font = '700 28px "DM Sans", Arial, sans-serif'; c.fillText('V / C     V I C E C H R O M E', 102, 113);
   c.textAlign = 'right'; c.fillText('SOLERA BAY  /  001', 1500, 113); c.textAlign = 'left';
   c.fillStyle = '#f5e9d3';
-  c.font = `900 ${fitText(c, name.toUpperCase(), 1395, 170)}px 'Barlow Condensed', Impact, sans-serif`;
-  c.fillText(name.toUpperCase(), 102, 365);
-  c.fillStyle = '#e9b9a2'; c.font = '700 29px "DM Sans", Arial, sans-serif'; c.fillText('DESIGN THE WRAP. OWN THE BOULEVARD.', 105, 430);
+  const title = (name.trim() || 'UNTITLED BUILD').toUpperCase();
+  c.font = `900 ${fitText(c, title, 1395, 170)}px 'Barlow Condensed', Impact, sans-serif`;
+  c.fillText(title, 102, 365, 1395);
+  c.fillStyle = '#e9b9a2'; c.font = '700 29px "DM Sans", Arial, sans-serif'; c.fillText('DESIGN YOUR MARK. OWN THE BOULEVARD.', 105, 430);
   const stage = document.createElement('canvas'); stage.width = 1200; stage.height = 650;
   renderStage(stage.getContext('2d')!, { ...options, scene: 'boulevard', lights: true, shutter: 1 });
   c.drawImage(stage, 0, 540, 1600, 867);

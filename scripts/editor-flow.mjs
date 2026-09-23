@@ -23,7 +23,30 @@ await page.getByRole('button', { name: 'Save', exact: true }).click();
 await page.getByText('ARTWORK APPLIED').waitFor({ timeout: 15000 });
 await page.screenshot({ path: 'docs/evidence/applied-desktop.png', fullPage: true });
 console.log('APPLIED:', await page.getByText('ARTWORK APPLIED').count());
+await page.evaluate(() => {
+  window.__revealFrames = [];
+  let start = null;
+  const capture = time => {
+    const canvas = document.querySelector('.reveal-stage');
+    if (!canvas) { requestAnimationFrame(capture); return; }
+    if (start === null) start = time;
+    const elapsed = time - start;
+    const targets = [0, 220, 1550];
+    if (window.__revealFrames.length < 3 && elapsed >= targets[window.__revealFrames.length]) {
+      const c = canvas.getContext('2d');
+      window.__revealFrames.push({ image: canvas.toDataURL(), door: [...c.getImageData(600, 400, 1, 1).data], roof: [...c.getImageData(600, 280, 1, 1).data] });
+    }
+    if (window.__revealFrames.length < 3) requestAnimationFrame(capture);
+  };
+  requestAnimationFrame(capture);
+});
 await page.getByRole('button', { name: /roll out/i }).click();
+await page.waitForFunction(() => window.__revealFrames?.length === 3, { timeout: 5000 });
+const frames = await page.evaluate(() => window.__revealFrames);
+for (const [i, label] of ['closed', 'halfway', 'open'].entries()) await fs.writeFile(`docs/evidence/reveal-${label}.png`, Buffer.from(frames[i].image.split(',')[1], 'base64'));
+assert.notDeepEqual(frames[0].door, frames[1].door, 'opening shutter must reveal the lower door in real UI frames');
+assert.deepEqual(frames[0].roof, frames[1].roof, 'halfway frame must still conceal the roof');
+assert.notDeepEqual(frames[1].roof, frames[2].roof, 'open frame must reveal the roof');
 await page.getByRole('button', { name: /skip reveal/i }).click();
 await page.screenshot({ path: 'docs/evidence/cover-preview-desktop.png', fullPage: true });
 const coverDownload = page.waitForEvent('download');
@@ -39,6 +62,22 @@ assert.equal(coverBytes.readUInt32BE(16), 1600);
 assert.equal(coverBytes.readUInt32BE(20), 2000);
 const artBytes = await fs.readFile('docs/evidence/sample-panel-art.png');
 assert.ok(artBytes.length > 10000);
+const changedPixels = await page.evaluate(async encoded => {
+  const { makeStarter } = await import('/src/art.ts');
+  const { renderCover } = await import('/src/render.ts');
+  const image = new Image(); image.src = `data:image/png;base64,${encoded}`; await image.decode();
+  const starter = new Image(); starter.src = makeStarter('sunset'); await starter.decode();
+  const expected = document.createElement('canvas');
+  renderCover(expected.getContext('2d'), { art: starter, scene: 'boulevard', paint: 'graphite' }, 'SUNSET COURIER');
+  const actual = document.createElement('canvas'); actual.width = 1600; actual.height = 2000;
+  actual.getContext('2d').drawImage(image, 0, 0);
+  const a = actual.getContext('2d').getImageData(550, 1000, 480, 155).data;
+  const b = expected.getContext('2d').getImageData(550, 1000, 480, 155).data;
+  let changed = 0;
+  for (let i = 0; i < a.length; i += 4) if (Math.abs(a[i] - b[i]) + Math.abs(a[i + 1] - b[i + 1]) + Math.abs(a[i + 2] - b[i + 2]) > 80) changed++;
+  return changed;
+}, coverBytes.toString('base64'));
+assert.ok(changedPixels > 100, `distinctive edit should survive on cover; changed pixels: ${changedPixels}`);
 await page.reload({ waitUntil: 'networkidle' });
 await page.getByRole('button', { name: /enter the garage/i }).click();
 await page.getByText('ARTWORK APPLIED').waitFor({ timeout: 10000 });
