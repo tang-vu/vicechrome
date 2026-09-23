@@ -34,9 +34,9 @@ await page.mouse.up();
 await page.screenshot({ path: 'docs/evidence/editor-mobile-edited.png' });
 await page.getByRole('button', { name: /save artwork/i }).click();
 await page.getByText('ARTWORK APPLIED').waitFor({ timeout: 10000 });
+await page.screenshot({ path: 'docs/evidence/applied-mobile.png', fullPage: true });
 const after = await page.locator('.garage-stage canvas').evaluate(el => el.toDataURL());
 assert.notEqual(after, before, 'mobile edit must change the applied car');
-await page.screenshot({ path: 'docs/evidence/applied-mobile.png', fullPage: true });
 await page.getByRole('button', { name: /roll out/i }).click();
 await page.getByRole('button', { name: /skip reveal/i }).click();
 const download = page.waitForEvent('download');
@@ -46,22 +46,20 @@ await cover.saveAs('docs/evidence/mobile-cover.png');
 const bytes = await fs.readFile('docs/evidence/mobile-cover.png');
 assert.equal(bytes.readUInt32BE(16), 1600);
 assert.equal(bytes.readUInt32BE(20), 2000);
-const changedPixels = await page.evaluate(async encoded => {
-  const { makeStarter } = await import('/src/art.ts');
-  const { renderCover } = await import('/src/render.ts');
-  const image = new Image(); image.src = `data:image/png;base64,${encoded}`; await image.decode();
-  const starter = new Image(); starter.src = makeStarter('sunset'); await starter.decode();
-  const baseline = document.createElement('canvas');
-  renderCover(baseline.getContext('2d'), { art: starter, scene: 'boulevard', paint: 'graphite' }, 'SUNSET COURIER');
-  const coverCanvas = document.createElement('canvas'); coverCanvas.width = 1600; coverCanvas.height = 2000;
-  coverCanvas.getContext('2d').drawImage(image, 0, 0);
-  const a = coverCanvas.getContext('2d').getImageData(550, 1000, 480, 155).data;
-  const b = baseline.getContext('2d').getImageData(550, 1000, 480, 155).data;
-  let changed = 0;
-  for (let i = 0; i < a.length; i += 4) if (Math.abs(a[i] - b[i]) + Math.abs(a[i + 1] - b[i + 1]) + Math.abs(a[i + 2] - b[i + 2]) > 80) changed++;
-  return changed;
-}, bytes.toString('base64'));
-assert.ok(changedPixels > 100, `mobile edit should appear on cover; changed pixels: ${changedPixels}`);
+const matchedPixels = await page.evaluate(async ({ original, edited, encoded }) => {
+  const load = async src => { const image = new Image(); image.src = src; await image.decode(); return image; };
+  const [beforeImage, afterImage, coverImage] = await Promise.all([load(original), load(edited), load(`data:image/png;base64,${encoded}`)]);
+  const pixels = (image, width, height) => { const canvas = document.createElement('canvas'); canvas.width = width; canvas.height = height; const c = canvas.getContext('2d'); c.drawImage(image, 0, 0); return c.getImageData(0, 0, width, height).data; };
+  const beforeData = pixels(beforeImage, 1200, 650), afterData = pixels(afterImage, 1200, 650), coverData = pixels(coverImage, 1600, 2000);
+  let changed = 0, matched = 0;
+  for (let y = 355; y < 457; y += 2) for (let x = 430; x < 748; x += 2) {
+    const i = (y * 1200 + x) * 4, j = ((540 + Math.round(y * 867 / 650)) * 1600 + Math.round(x * 1600 / 1200)) * 4;
+    const difference = Math.abs(beforeData[i] - afterData[i]) + Math.abs(beforeData[i + 1] - afterData[i + 1]) + Math.abs(beforeData[i + 2] - afterData[i + 2]);
+    if (difference > 90) { changed++; if (Math.abs(afterData[i] - coverData[j]) + Math.abs(afterData[i + 1] - coverData[j + 1]) + Math.abs(afterData[i + 2] - coverData[j + 2]) < 90) matched++; }
+  }
+  return { changed, matched };
+}, { original: before, edited: after, encoded: bytes.toString('base64') });
+assert.ok(matchedPixels.changed > 10 && matchedPixels.matched > 5, `mobile edit should appear on cover: ${JSON.stringify(matchedPixels)}`);
 assert.deepEqual(errors, []);
 console.log('Mobile Draw, Save, applied car, and cover export passed.');
 await browser.close();

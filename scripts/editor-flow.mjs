@@ -11,6 +11,7 @@ await page.goto(process.env.VICECHROME_URL || 'http://localhost:5173/', { waitUn
 await page.screenshot({ path: 'docs/evidence/welcome-desktop.png', fullPage: true });
 await page.getByRole('button', { name: /enter the garage/i }).click();
 await page.screenshot({ path: 'docs/evidence/garage-desktop.png', fullPage: true });
+const originalStage = await page.locator('.garage-stage canvas').evaluate(el => el.toDataURL());
 await page.getByRole('button', { name: /design your panel art/i }).click();
 await page.getByText('Draw', { exact: true }).click();
 await page.locator('[data-testid="native-draw-size"]').fill('35');
@@ -24,6 +25,7 @@ await page.screenshot({ path: 'docs/evidence/editor-edited.png', fullPage: true 
 await page.getByRole('button', { name: 'Save', exact: true }).click();
 await page.getByText('ARTWORK APPLIED').waitFor({ timeout: 15000 });
 await page.screenshot({ path: 'docs/evidence/applied-desktop.png', fullPage: true });
+const editedStage = await page.locator('.garage-stage canvas').evaluate(el => el.toDataURL());
 console.log('APPLIED:', await page.getByText('ARTWORK APPLIED').count());
 await page.evaluate(() => {
   window.__revealFrames = [];
@@ -64,22 +66,20 @@ assert.equal(coverBytes.readUInt32BE(16), 1600);
 assert.equal(coverBytes.readUInt32BE(20), 2000);
 const artBytes = await fs.readFile('docs/evidence/sample-panel-art.png');
 assert.ok(artBytes.length > 10000);
-const changedPixels = await page.evaluate(async encoded => {
-  const { makeStarter } = await import('/src/art.ts');
-  const { renderCover } = await import('/src/render.ts');
-  const image = new Image(); image.src = `data:image/png;base64,${encoded}`; await image.decode();
-  const starter = new Image(); starter.src = makeStarter('sunset'); await starter.decode();
-  const expected = document.createElement('canvas');
-  renderCover(expected.getContext('2d'), { art: starter, scene: 'boulevard', paint: 'graphite' }, 'SUNSET COURIER');
-  const actual = document.createElement('canvas'); actual.width = 1600; actual.height = 2000;
-  actual.getContext('2d').drawImage(image, 0, 0);
-  const a = actual.getContext('2d').getImageData(550, 1000, 480, 155).data;
-  const b = expected.getContext('2d').getImageData(550, 1000, 480, 155).data;
-  let changed = 0;
-  for (let i = 0; i < a.length; i += 4) if (Math.abs(a[i] - b[i]) + Math.abs(a[i + 1] - b[i + 1]) + Math.abs(a[i + 2] - b[i + 2]) > 80) changed++;
-  return changed;
-}, coverBytes.toString('base64'));
-assert.ok(changedPixels > 100, `distinctive edit should survive on cover; changed pixels: ${changedPixels}`);
+const matchedPixels = await page.evaluate(async ({ original, edited, encoded }) => {
+  const load = async src => { const image = new Image(); image.src = src; await image.decode(); return image; };
+  const [beforeImage, afterImage, coverImage] = await Promise.all([load(original), load(edited), load(`data:image/png;base64,${encoded}`)]);
+  const pixels = (image, width, height) => { const canvas = document.createElement('canvas'); canvas.width = width; canvas.height = height; const c = canvas.getContext('2d'); c.drawImage(image, 0, 0); return c.getImageData(0, 0, width, height).data; };
+  const beforeData = pixels(beforeImage, 1200, 650), afterData = pixels(afterImage, 1200, 650), coverData = pixels(coverImage, 1600, 2000);
+  let changed = 0, matched = 0;
+  for (let y = 355; y < 457; y += 2) for (let x = 430; x < 748; x += 2) {
+    const i = (y * 1200 + x) * 4, j = ((540 + Math.round(y * 867 / 650)) * 1600 + Math.round(x * 1600 / 1200)) * 4;
+    const difference = Math.abs(beforeData[i] - afterData[i]) + Math.abs(beforeData[i + 1] - afterData[i + 1]) + Math.abs(beforeData[i + 2] - afterData[i + 2]);
+    if (difference > 90) { changed++; if (Math.abs(afterData[i] - coverData[j]) + Math.abs(afterData[i + 1] - coverData[j + 1]) + Math.abs(afterData[i + 2] - coverData[j + 2]) < 90) matched++; }
+  }
+  return { changed, matched };
+}, { original: originalStage, edited: editedStage, encoded: coverBytes.toString('base64') });
+assert.ok(matchedPixels.changed > 40 && matchedPixels.matched > 20, `distinctive edit should survive on cover: ${JSON.stringify(matchedPixels)}`);
 await page.reload({ waitUntil: 'networkidle' });
 await page.getByRole('button', { name: /enter the garage/i }).click();
 await page.getByText('ARTWORK APPLIED').waitFor({ timeout: 10000 });
