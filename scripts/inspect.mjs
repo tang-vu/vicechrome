@@ -1,0 +1,20 @@
+import { launchChrome } from './browser.mjs';
+import fs from 'node:fs/promises';
+
+await fs.mkdir('docs/evidence', { recursive: true });
+const browser = await launchChrome();
+const page = await browser.newPage({ viewport: { width: 1440, height: 900 }, deviceScaleFactor: 1, acceptDownloads: true });
+const errors = [];
+page.on('pageerror', e => errors.push(e.message));
+page.on('console', message => { if (message.type() === 'error') errors.push(message.text()); });
+await page.goto('http://localhost:5173/', { waitUntil: 'networkidle' });
+await page.screenshot({ path: 'docs/evidence/welcome-desktop.png', fullPage: true });
+await page.getByRole('button', { name: /enter the garage/i }).click();
+await page.screenshot({ path: 'docs/evidence/garage-desktop.png', fullPage: true });
+await page.getByRole('button', { name: /design your panel art/i }).click();
+await page.waitForTimeout(15000);
+await page.screenshot({ path: 'docs/evidence/editor-desktop.png', fullPage: true });
+console.log('EDITOR TEXT:', (await page.locator('body').innerText()).slice(0, 5000));
+console.log('IFRAMES:', await page.locator('iframe').count());
+console.log('ERRORS:', errors);
+await browser.close();

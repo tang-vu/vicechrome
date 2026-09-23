@@ -1,0 +1,22 @@
+import { launchChrome } from './browser.mjs';
+import fs from 'node:fs/promises';
+
+await fs.mkdir('docs/evidence', { recursive: true });
+const browser = await launchChrome();
+const page = await browser.newPage({ viewport: { width: 390, height: 844 }, deviceScaleFactor: 1 });
+const errors = [];
+page.on('pageerror', e => errors.push(e.message));
+await page.goto('http://localhost:5173/', { waitUntil: 'networkidle' });
+await page.screenshot({ path: 'docs/evidence/welcome-mobile.png', fullPage: true });
+await page.getByRole('button', { name: /enter the garage/i }).click();
+await page.screenshot({ path: 'docs/evidence/garage-mobile.png', fullPage: true });
+await page.getByRole('button', { name: /design your panel art/i }).click();
+await page.waitForFunction(() => !document.querySelector('.mobile-editor-actions button:last-child')?.hasAttribute('disabled'), { timeout: 30000 });
+await page.screenshot({ path: 'docs/evidence/editor-mobile.png' });
+console.log('SAVE VISIBLE:', await page.getByRole('button', { name: /save artwork/i }).isVisible());
+console.log('HORIZONTAL OVERFLOW:', await page.evaluate(() => document.documentElement.scrollWidth > innerWidth));
+await page.getByRole('button', { name: /save artwork/i }).click();
+await page.getByText('ARTWORK APPLIED').waitFor({ timeout: 10000 });
+console.log('MOBILE SAVE APPLIED:', await page.getByText('ARTWORK APPLIED').count());
+console.log('ERRORS:', errors);
+await browser.close();
