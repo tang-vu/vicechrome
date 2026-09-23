@@ -8,12 +8,12 @@ const page = await browser.newPage();
 await page.goto('http://localhost:5173/');
 const result = await page.evaluate(async () => {
   const { renderStage } = await import('/src/render.ts');
-  const src = document.createElement('canvas'); src.width = 1000; src.height = 420;
+  const src = document.createElement('canvas'); src.width = 1000; src.height = 335;
   const s = src.getContext('2d');
-  s.fillStyle = '#f01f23'; s.fillRect(0, 0, 500, 420);
-  s.fillStyle = '#1857ef'; s.fillRect(500, 0, 500, 420);
+  s.fillStyle = '#f01f23'; s.fillRect(0, 0, 500, 335);
+  s.fillStyle = '#1857ef'; s.fillRect(500, 0, 500, 335);
   s.fillStyle = '#fff'; s.font = '900 100px Arial'; s.fillText('LEFT', 75, 215); s.fillText('RIGHT', 578, 215);
-  s.font = '900 110px Arial'; s.fillText('→', 420, 350); s.fillText('◆', 630, 355);
+  s.font = '900 85px Arial'; s.fillText('→', 422, 302); s.fillText('◆', 640, 302);
   for (let row = 0; row < 2; row++) for (let col = 0; col < 10; col++) { s.fillStyle = (row + col) % 2 ? '#111' : '#fff'; s.fillRect(col * 100, row * 30, 100, 30); }
   const image = new Image(); image.src = src.toDataURL(); await image.decode();
   const target = document.createElement('canvas'); target.width = 1200; target.height = 650;

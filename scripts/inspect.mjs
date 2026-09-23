@@ -7,7 +7,8 @@ const page = await browser.newPage({ viewport: { width: 1440, height: 900 }, dev
 const errors = [];
 page.on('pageerror', e => errors.push(e.message));
 page.on('console', message => { if (message.type() === 'error') errors.push(message.text()); });
-await page.goto('http://localhost:5173/', { waitUntil: 'networkidle' });
+page.on('response', response => { if (response.status() >= 400) errors.push(`${response.status()} ${response.url()}`); });
+await page.goto(process.env.VICECHROME_URL || 'http://localhost:5173/', { waitUntil: 'networkidle' });
 await page.screenshot({ path: 'docs/evidence/welcome-desktop.png', fullPage: true });
 await page.getByRole('button', { name: /enter the garage/i }).click();
 await page.screenshot({ path: 'docs/evidence/garage-desktop.png', fullPage: true });

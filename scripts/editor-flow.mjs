@@ -7,7 +7,7 @@ const browser = await launchChrome();
 const page = await browser.newPage({ viewport: { width: 1440, height: 900 }, acceptDownloads: true });
 const errors = [];
 page.on('pageerror', e => errors.push(e.message));
-await page.goto('http://localhost:5173/', { waitUntil: 'networkidle' });
+await page.goto(process.env.VICECHROME_URL || 'http://localhost:5173/', { waitUntil: 'networkidle' });
 await page.getByRole('button', { name: /enter the garage/i }).click();
 await page.getByRole('button', { name: /design your panel art/i }).click();
 await page.getByText('Draw', { exact: true }).click();

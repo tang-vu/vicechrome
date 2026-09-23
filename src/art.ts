@@ -9,10 +9,10 @@ export const commissions: { id: Direction; title: string; brief: string; code: s
 
 export function makeStarter(id: Direction): string {
   const canvas = document.createElement('canvas');
-  canvas.width = 1000; canvas.height = 420;
+  canvas.width = 1000; canvas.height = 335;
   const c = canvas.getContext('2d')!;
   const bg = id === 'midnight' ? '#121b25' : id === 'beach' ? '#b7d5bf' : id === 'plain' ? '#e8e1d3' : '#f0725d';
-  c.fillStyle = bg; c.fillRect(0, 0, 1000, 420);
+  c.fillStyle = bg; c.fillRect(0, 0, 1000, 335);
   if (id === 'plain') return canvas.toDataURL('image/png');
   c.save();
   c.translate(-100, 0); c.rotate(-0.27);
@@ -46,10 +46,10 @@ export async function normalizeUpload(file: File): Promise<string> {
     if (bitmap.width < 64 || bitmap.height < 64 || bitmap.width > 6000 || bitmap.height > 6000) throw new Error('Image dimensions must be between 64 and 6000 pixels.');
     const canvas = document.createElement('canvas'); canvas.width = 1000; canvas.height = 420;
     const c = canvas.getContext('2d')!;
-    c.fillStyle = '#e8e1d3'; c.fillRect(0, 0, 1000, 420);
-    const scale = Math.min(1000 / bitmap.width, 420 / bitmap.height);
+    c.fillStyle = '#e8e1d3'; c.fillRect(0, 0, 1000, 335);
+    const scale = Math.min(1000 / bitmap.width, 335 / bitmap.height);
     const w = bitmap.width * scale, h = bitmap.height * scale;
-    c.drawImage(bitmap, (1000 - w) / 2, (420 - h) / 2, w, h);
+    c.drawImage(bitmap, (1000 - w) / 2, (335 - h) / 2, w, h);
     return canvas.toDataURL('image/png');
   } finally { bitmap.close(); }
 }

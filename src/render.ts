@@ -93,7 +93,11 @@ function car(c: CanvasRenderingContext2D, options: RenderOptions) {
   c.save(); bodyPath(c); c.clip();
   // The editable bitmap is fitted to a single, fixed door panel under the car's reflections.
   c.beginPath(); c.moveTo(426, 351); c.lineTo(752, 349); c.lineTo(756, 461); c.lineTo(415, 461); c.closePath(); c.clip();
-  if (options.art) c.drawImage(options.art, 414, 347, 346, 116);
+  if (options.art) {
+    const scale = Math.min(346 / options.art.naturalWidth, 116 / options.art.naturalHeight);
+    const w = options.art.naturalWidth * scale, h = options.art.naturalHeight * scale;
+    c.drawImage(options.art, 414 + (346 - w) / 2, 347 + (116 - h) / 2, w, h);
+  }
   c.restore();
   // Panel seams and reflected lighting remain in front of the artwork.
   line(c, [410, 352, 405, 457], '#081a2099', 3);

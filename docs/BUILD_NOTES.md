@@ -7,9 +7,11 @@
 3. Build the garage, reveal, boulevard cover, persistence, mobile workspace, and exports.
 4. Test the actual SDK path in Chrome, capture evidence, and prepare submission materials.
 
-The repository was empty apart from `.gitattributes`, and `main` was clean. The official wrapper API documents a required `image` and `onSave({ dataUrl, blob })`. Installed `@unlayer/react-image-editor` is 1.0.2; its types were checked before integration. A fixed 2.5D original coupe was selected to keep panel alignment and export deterministic. The supported claim is **door-panel art**, not an arbitrary body wrap. The optional AI Assistant is explicitly disabled.
+The repository was empty apart from `.gitattributes`, and `main` was clean. The official wrapper API documents a required `image` and `onSave({ dataUrl, blob })`. Installed `@unlayer/react-image-editor` is 1.0.2; its types were checked before integration. A fixed 2.5D original coupe was selected to keep panel alignment and export deterministic. The supported claim is **door-panel art**, not an arbitrary body wrap. The optional AI Assistant is explicitly disabled. The official challenge announcement still listed September 24, 2026, 23:59 UTC when checked at 03:38 UTC on September 23, leaving about 44 hours 20 minutes.
 
 The app stores one latest applied blob in IndexedDB. A separate active editor session holds a stable input image; switching a commission selects a fresh seed for the next session. Cancel leaves the applied revision intact. Save results are validated, sequenced, and persisted in order. Cover export renders locally at 1600 × 2000. Unlayer requires its remote editor bundle and related assets; failure shows a retry path.
+
+Source is public at https://github.com/tang-vu/vicechrome. GitHub Pages is configured at https://tang-vu.github.io/vicechrome/. A clean Chrome session passed the live edit/save/export and mobile paths. The deployment workflow runs on each push to `main`.
 
 ## Verified status
 
@@ -19,6 +21,7 @@ The app stores one latest applied blob in IndexedDB. A separate active editor se
 - Chrome flow tested reload restoration, same-view before/after, opening the saved revision, and cancel without losing the applied revision.
 - A calibration bitmap with LEFT, RIGHT, an arrow, checkerboard, and diamond stayed correctly oriented on the panel (`calibration-panel.png` and `calibration-car.png`).
 - At 390 × 844, the editor loaded with a reachable labeled mobile Save action, and the page had no horizontal overflow. The mobile Save path was exercised separately.
+- Simulated IndexedDB failure and a corrupt PNG upload did not prevent editing, applying artwork, or exporting a cover.
 
 ## Limitations
 

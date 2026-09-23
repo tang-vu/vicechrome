@@ -6,16 +6,17 @@
 
 **Verified evidence:** `docs/evidence/editor-edited.png` shows a diagonal stroke inside Unlayer. `applied-desktop.png` shows it on the coupe. `sample-cover.png` and `sample-panel-art.png` were downloaded from the live local browser flow. `editor-mobile.png` shows the loaded narrow editor. Automated Chrome runs exercised actual Save, downloads, restore, before/after, cancel, and mobile Save. See `docs/BUILD_NOTES.md` for limits.
 
+**Source:** https://github.com/tang-vu/vicechrome  
+**Live studio:** https://tang-vu.github.io/vicechrome/
+
 ## Owner checklist
 
 - [ ] Confirm eligibility and any FAQ conditions directly with Unlayer; the linked FAQ was inaccessible through the available fetch tool.
-- [ ] Confirm public GitHub source URL and deployed URL after deployment.
+- [x] Public GitHub source and GitHub Pages deployment are live; a fresh Chrome session exercised the journey.
 - [ ] Record a 45–60 second clip using `DEMO_SCRIPT.md`.
 - [ ] Complete the [submission form](https://lnkd.in/eEE_bKHc) before **September 24, 2026, 23:59 UTC**.
 - [ ] Publish a public post with **#BuiltWithImageEditor**. No form or post is submitted automatically.
 
 ## X post draft
 
-Built VICECHROME for the Unlayer React Image Editor challenge. Draw panel art in the real editor, save it onto an original illustrated coupe, then roll through Solera Bay and export your one-of-one cover. Source: [GitHub URL] Demo: [live URL] #BuiltWithImageEditor
-
-Replace bracketed URLs only after checking the actual public destinations.
+Built VICECHROME for the Unlayer React Image Editor challenge. Draw panel art in the real editor, save it onto an original illustrated coupe, then roll through Solera Bay and export your one-of-one cover. Source: https://github.com/tang-vu/vicechrome Demo: https://tang-vu.github.io/vicechrome/ #BuiltWithImageEditor

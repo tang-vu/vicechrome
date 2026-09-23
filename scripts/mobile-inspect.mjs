@@ -6,7 +6,7 @@ const browser = await launchChrome();
 const page = await browser.newPage({ viewport: { width: 390, height: 844 }, deviceScaleFactor: 1 });
 const errors = [];
 page.on('pageerror', e => errors.push(e.message));
-await page.goto('http://localhost:5173/', { waitUntil: 'networkidle' });
+await page.goto(process.env.VICECHROME_URL || 'http://localhost:5173/', { waitUntil: 'networkidle' });
 await page.screenshot({ path: 'docs/evidence/welcome-mobile.png', fullPage: true });
 await page.getByRole('button', { name: /enter the garage/i }).click();
 await page.screenshot({ path: 'docs/evidence/garage-mobile.png', fullPage: true });

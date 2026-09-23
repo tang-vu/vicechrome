@@ -65,7 +65,7 @@ export default function App() {
       if (settings.buildName) setBuildName(settings.buildName.slice(0, 28));
       if (settings.direction && commissions.some(c => c.id === settings.direction)) setDirection(settings.direction);
     } catch { /* browsing continues without settings */ }
-    readArtwork().then(async blob => { if (blob && alive) { const url = await blobToDataUrl(blob); if (alive) setApplied(url); } }).catch(() => { if (alive) setPersisted(false); });
+    readArtwork().then(async blob => { if (blob && alive && saveId.current === 0) { const url = await blobToDataUrl(blob); if (alive && saveId.current === 0) setApplied(url); } }).catch(() => { if (alive) setPersisted(false); });
     return () => { alive = false; };
   }, []);
 
